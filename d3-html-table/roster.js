@@ -32,7 +32,7 @@
 
  var positions = {G: "Goalkeeper", D: "Defender", M: "Midfielder", F: "Forward"};
 
- var columns = ['No', 'Name', "Team" , "Pos"];
+ var columns = ['No', 'Name',  "Pos"];
 
  var teamSelector = d3.select('#page-title')
  .append('select')
@@ -91,6 +91,13 @@
 		.data(columns) // user remapped columns since slice won't work in intermittent col vals
 		.enter()// add DOM elements based on # in virtual elements
 		.append('th')
+		.on('click', function(d){//onclick handler for column sorting based on click
+			tbody.selectAll('tr')
+			.sort(function(a,b){
+				return(d === "No") ?  d3.ascending(+a[d],+b[d]): d3.ascending(a[d],b[d]);//comparator
+			
+			})
+		})
 		.text(function(d){return d;});
 
 		var rows = tbody.selectAll('tr')
