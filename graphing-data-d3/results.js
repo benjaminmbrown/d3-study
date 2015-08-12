@@ -12,6 +12,17 @@ var svg = d3.select('#results')
 	.attr('width', width)
 	.attr('height', height);
 
+//ordinal & linear scale objects
+
+//ordinal to scale across entire width of screen - map to horizontal pixels
+var x = d3.scale
+			.ordinal()
+			.rangeRoundBands([margin.left, width - margin.right], 0.1);
+
+//linear - we want values in range of height - margin up to margin top.
+var y = d3.scale
+			.linear()
+			.range([height - margin.bottom, margin.top]);
 
 //standard reload function
 
@@ -28,27 +39,29 @@ var reload = function(){
 
 //standard redraw
 var redraw = function(data){
-//create virtual selection
-console.log('redraw');
-var bars = svg.selectAll('rect.bar').data(data);
-bars.enter()
-	.append('rect')
-	.classed('bar', true)
+	//set domain - actual values we want to scale
+	x.domain(data.map(function(d,i){return i;}));
+	y.domain([0, d3.max(data,function(d){return d.GoalsScored}) ]);
+	//create virtual selection
+	console.log('redraw');
+	var bars = svg.selectAll('rect.bar').data(data);
+	bars.enter()
+		.append('rect')
+		.classed('bar', true)
 
-bars
-	.attr("x", function(d,i){return i *6 ;})
-	.attr('width', 5)
-	.attr("y", function(d){
+	bars
+		.attr("x", function(d,i){return x(i)})
+		.attr('width', x.rangeBand)
+		.attr("y", function(d){
+			
 		
-		//return d.GoalsScored;
-		return height - margin.bottom - (d.GoalsScored * 50);
-	})
-	.attr("height", function(d){ 
-		console.log(d);
-		console.log(d.GoalsScored);
-		var scaledHeight = d.GoalsScored *50;
-		return 255;
-	});
+			//return height - margin.bottom - (d.GoalsScored * 50);
+			return y(d.GoalsScored);
+		})
+		.attr("height", function(d){ 
+			
+			return y(0)-y(d.GoalsScored);
+		});
 
 
 }
