@@ -1,0 +1,57 @@
+<html xmlns="html">
+<head>
+	<h1>Stupid simple d3 example</h1>
+
+	<link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+</head>
+
+<body>
+	<div class ="conatianer">
+		<div><h3>d3.js using simple manual data</h3></div>
+		<div id="content"></div>
+	</div>
+
+ <script src="http://d3js.org/d3.v3.min.js"></script>
+
+ <script>
+ var content = d3.select("#content");
+ var ul = content.append("ul");
+ var data = ['item1', 'item2', 'item3'];
+
+ ul.selectAll('li')//virtual selectio
+ .data(data)//sets the data for this virtual selection
+ .enter()//adds DOM items based on # items in virtual selection
+ .append('li')
+ 	.text(function (d){ return d;});//update the text for each virtual selection from the dataset
+
+//////////////////
+//add another item.. ..enter only runs once and updates only NEW items.. soyou'll only see item e 
+//added and no other changes
+data = ['itema', 'itemb', 'itemc', 'itemd'];
+
+ ul.selectAll('li')//virtual selection
+ .data(data)//sets the data for this virtual selection
+ .enter()//adds DOM items based on # items in virtual selection
+ .append('li')
+ 	.text(function (d){ return d;});//update the text for each virtual selection from the dataset
+
+//updates all list items with bound data (d);
+ul.selectAll('li')
+	.text(function(d){return d;});
+
+
+////////////////////////////////////
+//exposing exit/remove to show how to update
+data = ['item1', 'item2', 'item3'];
+
+var items = ul.selectAll('li') //virtual selection
+				.data(data); //sets the data for this virtual selection
+
+items.exit().remove(); // removes DOM elements based on # items in virtual selecion
+items.text(function(d){return d;}); //then update text values of virtual selections based on dataset
+
+
+ </script>
+</body>
+
+</html>
