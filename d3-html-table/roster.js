@@ -83,8 +83,6 @@
 
  	console.log('redrawing');
 
-
-
 	// we want to grab table headers here first:
 	thead.selectAll('th')
 		//.data(d3.map(data[0]).keys().slice(2))// we take the first row (data[0]) and tell d3 that table headers should map to these values
@@ -95,15 +93,20 @@
 			tbody.selectAll('tr')
 			.sort(function(a,b){
 				return(d === "No") ?  d3.ascending(+a[d],+b[d]): d3.ascending(a[d],b[d]);//comparator
-			
 			})
+			.style('background-color', function(d,i){// Adds odd/even striping
+				return (i%2)? 'white': 'lightgray';
+			});
 		})
 		.text(function(d){return d;});
 
 		var rows = tbody.selectAll('tr')
 					.data(roster);//set data to tsv data from before
 	rows.enter() //add DOM elements based on # of virtual entries in data
-		.append('tr');//add a tr to virtual element per # of data elements	
+		.append('tr')
+		.style('background-color', function(d,i){// Adds odd/even striping
+			return (i%2)? 'white': 'lightgray';
+		});//add a tr to virtual element per # of data elements	
 
 	rows.exit()//handle removal of rows in tables body
 	.remove();
