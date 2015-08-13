@@ -111,16 +111,31 @@ var redraw = function(data) {
 	lines.each(function(d,i){
 	  	d3.select(this)
 	  		.attr('id', d.key)
-	  		.attr('data-legend', d.value[0].team);
+	  		.attr('data-legend-'+((i<16)?1:2), d.value[0].team);
 	  	})
 	var path = lines.append('path')
 	  				.datum(function(d){return d.value})//binding w/ datum is similar to 'data' except no virtual selection is prepped for entry()/exit()
 	  				.attr('d',function(d){return pointLine(d); });
 
-   	svg.append('g')
-   		.attr('class', 'legend')
-   		.attr('transform', 'translate('+(margin.left+20)+','+y(95)+')')
-   		.call(d3.legend);
+   	// svg.append('g')
+   	// 	.attr('class', 'legend')
+   	// 	.attr('transform', 'translate('+(margin.left+20)+','+y(95)+')')
+   	// 	.call(d3.legend);
+
+   	var legends = svg.selectAll('.legend')
+   					.data([{dx:margin.left + 20, dy: y(95)},
+   						   {dx:margin.left + 220, dy: y(95)}]);
+
+   			legends.enter()
+   			.append('g')
+	   		.attr('class', 'legend');
+
+	   		legends.each(function(d,i){
+	   			d3.select(this)
+	   				.attr('transform', 'translate('+d.dx+','+d.dy+')')
+	   				.call(d3.legend, 'data-legend-' + (i +1));
+	   		});
+   						
 
    var axis = svg.selectAll('.axis')
    					.data([
