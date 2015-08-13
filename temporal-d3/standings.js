@@ -103,13 +103,20 @@ var redraw = function(data) {
   				.data(data.entries());
 
 	lines.enter()
-	  	.append('g')
-	  	.style('stroke', function(d,i){return colors24[i];})//add line coloring based on color array
-	  	.attr('class','line-graph')
-	  	.attr('transform', "translate("+xAxis.tickPadding()+",0)");
+	  	.append('g');
+
+	lines.sort(function(a,b){
+		var aPoints = a.value[a.value.length -1].leaguePoints;
+		var bPoints = b.value[b.value.length -1].leaguePoints;
+		return d3.descending(aPoints, bPoints);
+	})
+
 
 	lines.each(function(d,i){
 	  	d3.select(this)
+		  	.style('stroke', colors24[i])//add line coloring based on color array
+		  	.attr('class','line-graph')
+		  	.attr('transform', "translate("+xAxis.tickPadding()+",0)")
 	  		.attr('id', d.key)
 	  		.attr('data-legend-'+((i<16)?1:2), d.value[0].team);
 	  	})
