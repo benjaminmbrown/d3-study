@@ -1,23 +1,39 @@
 <html xmlns="html">
-    <head>
-        <title>England League Two Standings</title>
-        <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css"/>
-        <link rel="stylesheet" href="standings.css"/>
-    </head>
-    <body>
-        <div class="container">
-            <div>
-                <h3>England League Two Results</h3>
-            </div>
-            <div class="row">
-                <div id="standings-chart" class="span12"></div>
-            </div>
-            <div class="row">
-                <div id="standings-table" class="span12 table-responsive">
-                </div>
-            </div>
-        </div>
-        <script src="http://d3js.org/d3.v3.min.js"></script>
-        <script src="standings.js"></script>
-    </body>
+<head>
+	<title>England League Two Standings</title>
+	<link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css"/>
+	<link rel="stylesheet" href="standings.css"/>
+</head>
+<body>
+	<div class="container">
+		<div>
+			<h3>League standings over time</h3>
+		</div>
+		<div class="row">
+			<div id="standings-chart" class="span12"></div>
+		</div>
+		<div class="row">
+			<div id="standings-table" class="span12 table-responsive">
+			</div>
+		</div>
+		<div class="row">
+			<h4>topics covered</h4>
+			<ul>
+				<li>Read in JSON</li>
+				<li>Flattened the data into single array of games</li>
+				<li>Use d3 data manipulation functions to nest data into map of teams with array of games</li>
+				<li>modified games data to reflect games from parent team's perspective & sum up league points over time</li>
+				<li>X&Y Scales + line drawing function + css</li>
+				<li>Date convesions</li>
+				<li></li>
+
+			</ul>
+		</div>
+
+	</div>
+
+	<script src="http://d3js.org/d3.v3.min.js"></script>
+	<script src="standings.js"></script>
+
+</body>
 </html>

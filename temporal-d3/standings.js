@@ -4,16 +4,44 @@ var width = 750,
     height = 500,
     margin = { top: 20, right: 20, bottom: 20, left:70 };
 
+//create unified date format 	ALWAYS Use this
+var parseDate = d3.time.format("%Y-%m-%d").parse;
+
+//ordinal to scale across entire width of screen - map to horizontal pixels
+var x = d3.time.scale().range([margin.left, width - margin.right]);
+
+//linear - we want values in range of height - margin up to margin top.
+var y = d3.scale
+			.linear()
+			.range([height - margin.bottom, margin.top]);
+
+
+//Axis orientation
+var xAxis = d3.svg.axis().scale(x).orient('bottom');
+var yAxis = d3.svg.axis().scale(y).orient('left');
+
+var pointLine = d3.svg.line()
+					.x(function(d){return x(d.date)})
+					.y(function(d){return y(d.leaguePoints)});
+
+
 /* The drawing area */
 var svg = d3.select("#standings-chart")
   .append("svg")
   .attr("width", width)
   .attr("height", height);
 
+
 /* Our standard data reloading function */
 var reload = function() {
   var data = [];
   d3.json('eng2-2013-14.json', function(results){
+  	//Convert strings to dates
+results.forEach(function(d){ d.Date = parseDate(d.Date);})
+
+  	x.domain([results[0].Date, results[results.length-1].Date]);//Date domain x-axis example..Grab date from first and last resultsd
+	y.domain([0,100]);
+
 
   	//flatten data
   	//put the date into each games map then create merged array of eaech games map
@@ -61,7 +89,35 @@ var reload = function() {
 
 /* Our standard graph drawing function */
 var redraw = function(data) {
-  // Fill in here
+  // select all virtual elements with line graph class
+  var lines = svg.selectAll('.line-graph')
+  				.data(data.entries());
+
+  				lines.enter()
+  					.append('g')
+  					.attr('class','line-graph')
+  					.attr('transform', "translate("+xAxis.tickPadding()+",0)");
+
+  				var path = lines.append('path')
+  								.datum(function(d){return d.value})//binding w/ datum is similar to 'data' except no virtual selection is prepped for entry()/exit()
+  								.attr('d',function(d){return pointLine(d); });
+
+   var axis = svg.selectAll('.axis')
+   					.data([
+   							{axis: xAxis, x:0, y: y(0), clazz: 'x'},
+   							{axis: yAxis, x:x.range()[0], y:0, clazz:'y'}
+   						])
+
+   	axis.enter().append('g')
+   				.attr('class', function(d){return 'axis '+d.clazz})
+   				.attr('transform', function(d){
+   					return "translate("+d.x+","+d.y+")";
+   				});
+
+   	axis.each(function(d){
+   		d3.select(this).call(d.axis);
+   	})
+
 };
 
 var gameOutcome = function(team, game, games){
