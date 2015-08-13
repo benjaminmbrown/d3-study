@@ -24,6 +24,12 @@ var y = d3.scale
 			.linear()
 			.range([height - margin.bottom, margin.top]);
 
+
+//axes draw objects
+var xAxis = d3.svg.axis().scale(x).orient('bottom');
+var yAxis = d3.svg.axis().scale(y).orient('left');
+
+
 //standard reload function
 
 var reload = function(){
@@ -53,8 +59,7 @@ var redraw = function(data){
 		.attr("x", function(d,i){return x(i)})
 		.attr('width', x.rangeBand)
 		.attr("y", function(d){
-			
-		
+
 			//return height - margin.bottom - (d.GoalsScored * 50);
 			return y(d.GoalsScored);
 		})
@@ -63,7 +68,25 @@ var redraw = function(data){
 			return y(0)-y(d.GoalsScored);
 		});
 
+	//create axis-driving data and apply to draw axes
+	var axisData = [
+	{axis: xAxis, dx: 0, dy: (height - margin.bottom), clazz: 'x'},
+	{axis: yAxis, dx: margin.left , dy: 0, clazz: 'y'}
+	];
 
-}
+	var axis = svg.selectAll('g.axis')
+					.data(axisData);
+	axis.enter()
+		.append('g')
+		.classed('axis', true);
+
+	axis.each(function(d){
+		d3.select(this) //select self as technique go avoid multiple function(d) declaration
+			.attr('transform', 'translate('+d.dx+','+d.dy+')')
+			.classed(d.clazz, true)
+			.call(d.axis);
+	});
+
+	}
 
 reload();
