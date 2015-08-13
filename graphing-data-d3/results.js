@@ -55,18 +55,30 @@ var redraw = function(data){
 		.append('rect')
 		.classed('bar', true)
 
+	// bars
+	// 	.attr("x", function(d,i){return x(i)})
+	// 	.attr('width', x.rangeBand)
+	// 	.attr("y", function(d){
+	// 		//return height - margin.bottom - (d.GoalsScored * 50);
+	// 		return y(d.GoalsScored);
+	// 	})
+	// 	.attr("height", function(d){ 
+			
+	// 		return y(0)-y(d.GoalsScored);
+	// 	});
+
+
 	bars
 		.attr("x", function(d,i){return x(i)})
 		.attr('width', x.rangeBand)
-		.attr("y", function(d){
+		.attr("y",y(0))//start bar height at zero
+		.attr('height', 0)
+		.transition()//animate from zero - interpolate from origin values to dest
+		.delay(function(d,i){return i * 50})//delay
+		.duration(1000)//delay
+		.attr("y", function(d){return y(d.GoalsScored);})//final height after animation
+		.attr("height", function(d){ return y(0)-y(d.GoalsScored);});
 
-			//return height - margin.bottom - (d.GoalsScored * 50);
-			return y(d.GoalsScored);
-		})
-		.attr("height", function(d){ 
-			
-			return y(0)-y(d.GoalsScored);
-		});
 
 	//create axis-driving data and apply to draw axes
 	var axisData = [
