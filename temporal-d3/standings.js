@@ -13,8 +13,16 @@ var colors24 = [
   "#843c39","#ad494a","#d6616b","#e7969c"
 ];
 
+//store game info for tooltips
+
+var gameDiv = d3.select('body')
+	.append('div')
+	.attr('class', 'tooltip')//tooltip is bootstrap
+	.style('opacity', 0);//invisible
+
 //create unified date format 	ALWAYS Use this
 var parseDate = d3.time.format("%Y-%m-%d").parse;
+var formatDate = d3.time.format("%b %d");
 
 //ordinal to scale across entire width of screen - map to horizontal pixels
 var x = d3.time.scale().range([margin.left, width - margin.right]);
@@ -98,6 +106,7 @@ results.forEach(function(d){ d.Date = parseDate(d.Date);})
 
 /* Our standard graph drawing function */
 var redraw = function(data) {
+  
   // select all virtual elements with line graph class
   var lines = svg.selectAll('.line-graph')
   				.data(data.entries());
@@ -120,10 +129,30 @@ var redraw = function(data) {
 	  		.attr('id', d.key)
 	  		.attr('data-legend-'+((i<16)?1:2), d.value[0].team);
 	  	})
+
 	var path = lines.append('path')
 	  				.datum(function(d){return d.value})//binding w/ datum is similar to 'data' except no virtual selection is prepped for entry()/exit()
 	  				.attr('d',function(d){return pointLine(d); });
 
+	
+//add circles for tooltips/detailed info
+	var circles = lines.selectAll('circle')
+					.data(function(d){return d.value;});
+
+		circles.enter()
+				.append('circle')
+				.attr('r', 2);
+
+		circles.each(function(d){
+			var color = d3.select(this.parentElement).style('stroke');
+			d3.select(this)
+				.attr('cx', x(d.date))
+				.attr('cy', y(d.leaguePoints))
+				.style('fill', color)
+				.on('mouseover', function(e){ return showGame(d, color);})
+				.on('click', function(e){ return showGame(d, color);})
+				.on('mouseout', function(e){ return hideGame();})
+		})
    	// svg.append('g')
    	// 	.attr('class', 'legend')
    	// 	.attr('transform', 'translate('+(margin.left+20)+','+y(95)+')')
@@ -150,15 +179,15 @@ var redraw = function(data) {
    							{axis: yAxis, x:x.range()[0], y:0, clazz:'y'}
    						])
 
-   	axis.enter().append('g')
-   				.attr('class', function(d){return 'axis '+d.clazz})
-   				.attr('transform', function(d){
-   					return "translate("+d.x+","+d.y+")";
-   				});
+	   	axis.enter().append('g')
+	   				.attr('class', function(d){return 'axis '+d.clazz})
+	   				.attr('transform', function(d){
+	   					return "translate("+d.x+","+d.y+")";
+	   				});
 
-   	axis.each(function(d){
-   		d3.select(this).call(d.axis);
-   	})
+	   	axis.each(function(d){
+	   		d3.select(this).call(d.axis);
+	   	})
 
    	//append additional legend to the svg
 
@@ -189,5 +218,31 @@ function makeId(string){
 	return string.replace(/[^A-Za-z0-9]/g,'');
 }
 
+function showGame(d, color){
+	gameDiv.transition()
+		.duration(50)
+		.style('opacity', 0)
+		.style('background-color', 'white');
+	
+	gameDiv.html(d.team+"("+ formatDate(d.date)+" - "+ d.align+")<br/>"
+		+"Versus: "+d.opponent + " <br/>"
+		+"Venue: "+d.venue + " <br/>"
+		+"Result: "+d.goals + "-" + d.allowed+ " " +d.decision +" <br/>"
+		+"Points: "+d.leaguePoints
+		)
+	.style({left:(d3.event.pageX+10) + "px",
+			top:(d3.event.pageY-40) + "px"})
+	.transition()
+	.duration(200)
+	.style('opacity',0.9)
+	.style('background-color', color);
+}
+
+function hideGame(){
+	gameDiv.transition()
+		.duration(500)
+		.style('opacity', 0)
+		.style('background-color', 'white');
+}
 reload();
 
