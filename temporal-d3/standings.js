@@ -4,6 +4,15 @@ var width = 750,
     height = 500,
     margin = { top: 20, right: 20, bottom: 20, left:70 };
 
+var colors24 = [
+  "#393b79","#5254a3","#6b6ecf","#9c9ede",
+  "#3182bd","#6baed6","#9ecae1","#c6dbef",
+  "#e6550d","#fd8d3c","#fdae6b","#fdd0a2",
+  "#31a354","#74c476","#a1d99b","#c7e9c0",
+  "#756bb1","#9e9ac8","#bcbddc","#dadaeb",
+  "#843c39","#ad494a","#d6616b","#e7969c"
+];
+
 //create unified date format 	ALWAYS Use this
 var parseDate = d3.time.format("%Y-%m-%d").parse;
 
@@ -57,8 +66,8 @@ results.forEach(function(d){ d.Date = parseDate(d.Date);})
   	var dataMap = d3.map();
 
   	d3.merge([
-  		d3.nest().key(function(d){return d.Away; }).entries(data),
-  		d3.nest().key(function(d){return d.Home; }).entries(data)
+  		d3.nest().key(function(d){return makeId(d.Away); }).entries(data),
+  		d3.nest().key(function(d){return makeId(d.Home); }).entries(data)
   		]).forEach(function(d){
   			if(dataMap.has(d.key)){
   				dataMap.set(d.key, d3.merge([dataMap.get(d.key), d.values])
@@ -93,14 +102,25 @@ var redraw = function(data) {
   var lines = svg.selectAll('.line-graph')
   				.data(data.entries());
 
-  				lines.enter()
-  					.append('g')
-  					.attr('class','line-graph')
-  					.attr('transform', "translate("+xAxis.tickPadding()+",0)");
+	lines.enter()
+	  	.append('g')
+	  	.style('stroke', function(d,i){return colors24[i];})//add line coloring based on color array
+	  	.attr('class','line-graph')
+	  	.attr('transform', "translate("+xAxis.tickPadding()+",0)");
 
-  				var path = lines.append('path')
-  								.datum(function(d){return d.value})//binding w/ datum is similar to 'data' except no virtual selection is prepped for entry()/exit()
-  								.attr('d',function(d){return pointLine(d); });
+	lines.each(function(d,i){
+	  	d3.select(this)
+	  		.attr('id', d.key)
+	  		.attr('data-legend', d.value[0].team);
+	  	})
+	var path = lines.append('path')
+	  				.datum(function(d){return d.value})//binding w/ datum is similar to 'data' except no virtual selection is prepped for entry()/exit()
+	  				.attr('d',function(d){return pointLine(d); });
+
+   	svg.append('g')
+   		.attr('class', 'legend')
+   		.attr('transform', 'translate('+(margin.left+20)+','+y(95)+')')
+   		.call(d3.legend);
 
    var axis = svg.selectAll('.axis')
    					.data([
@@ -118,10 +138,12 @@ var redraw = function(data) {
    		d3.select(this).call(d.axis);
    	})
 
+   	//append additional legend to the svg
+
 };
 
 var gameOutcome = function(team, game, games){
-	var isAway = (game.Away ===team);
+	var isAway = (makeId(game.Away) ===team);
 	var goals = isAway? +game.AwayScore : +game.HomeScore;
 	var allowed = isAway? + game.HomeScore : +game.AwayScore;
 	var decision = (goals > allowed)? 'win' : (goals < allowed)? 'loss': 'draw';
@@ -129,7 +151,7 @@ var gameOutcome = function(team, game, games){
 
 	return {
 		date: game.Date,
-		team: team,
+		team: isAway? game.Away: game.Home,
 		align: isAway? 'away' : 'home',
 		opponent: isAway? game.Home : game.Away,
 		goals : goals,
@@ -139,6 +161,10 @@ var gameOutcome = function(team, game, games){
 		points: points,
 		leaguePoints : d3.sum(games, function(d){return d.points}) + points
 	};
+}
+//converts a string to an Id
+function makeId(string){
+	return string.replace(/[^A-Za-z0-9]/g,'');
 }
 
 reload();
