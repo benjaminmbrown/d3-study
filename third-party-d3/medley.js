@@ -1,8 +1,11 @@
-var fill = d3.scale.category20();
-var width = 750,
+var fill = d3.scale.category20(),
+	width = 750,
 	height= 500,
 	radius = Math.min(width, height) / 2,
-	color = d3.scale.category20c();
+	color = d3.scale.category20c(),
+	rScale = d3.scale.linear().domain([0,4]).range([0,radius]),
+	myScale = [0, rScale(1.5), rScale(3.5), rScale(3.76), rScale(4)];
+	leaderScale = d3.scale.linear().range([10,60]);
 
 var sunburst = d3.select("#top-scorers").append("svg")
     .attr("width", width)
@@ -10,12 +13,20 @@ var sunburst = d3.select("#top-scorers").append("svg")
   .append("g")
     .attr("transform", "translate(" + width / 2 + "," + height * .52 + ")");
 
+//add info box to #top-scorers SVG
+var infoBox = d3.select("#top-scorers svg")
+	.append('g')
+	.attr('transform', 'translate('+((width/2) - rScale(1.1))+ ',' + ((height/2) - rScale(0.2))+ ")")
+	.append('text')
+	.style('font-size', '12px');
+
+
 var partition = d3.layout.partition()
     .sort(null)
     .size([2 * Math.PI, radius * radius])
     .value(function(d) { return 1; })
     .children(function(d){
-    	console.log(d);
+    	//console.log(d);
     	return d.children ? d.children: 
     	d.entries ? d.entries(): 
     	d.text ? null :
@@ -26,15 +37,16 @@ var partition = d3.layout.partition()
 var arc = d3.svg.arc()
     .startAngle(function(d) { return d.x; })
     .endAngle(function(d) { return d.x + d.dx; })
-    .innerRadius(function(d) { return Math.sqrt(d.y); })
-    .outerRadius(function(d) { return Math.sqrt(d.y + d.dy); });
+    .innerRadius(function(d) { return myScale[d.depth]; })
+    .outerRadius(function(d) { return myScale[d.depth+1]; });
 
 //Read in stats.tsv format, get top 100, feed to word cloud
 //set sceale, dwon't forget to set domains as well
-var leaderScale = d3.scale.linear().range([10,60]);
+
+
 
 d3.tsv('stats.tsv', function(data){
-	console.log(data);
+
 	var leaders = data
 		.filter(function(d){return d.G > 0;}) //exclude teams that don't score
 		.map(function(d){ return {
@@ -101,6 +113,8 @@ function drawSunburst(data){
       .style("stroke", "#fff")
       .style("fill", function(d) { return fill(d.children ? d.key : d.text); })//if it has children, use the key, if it is a leaf, use txt
       .style("fill-rule", "evenodd")
+      .on('mouseover', function(d){ return writeInfo(d);})
+      .on('click', function(d){ return writeInfo(d);})
       .each(stash);
 
    d3.selectAll("input").on("change", function change() {
@@ -132,3 +146,28 @@ function arcTween(a) {
     return arc(b);
   };
 }
+
+function writeInfo(d){
+var team = pos = name = goals = numPos = '';
+ 
+ switch(d.depth){
+ 	case 3: name = d.text; goals =''+d.goals+' goals'; d = d.parent;
+ 	case 2: pos = d.key + "("+d.children.length+")" ; d = d.parent;
+ 	case 1: team = d.key;
+ 	default : break;
+ }
+console.log(d);
+console.log(d.children.length);
+ var tspan = infoBox.selectAll('tspan')
+ 	.data([team,pos, name,goals]);
+
+ 	tspan.enter()
+ 		.append('tspan')
+ 		.attr('x', '0')
+ 		.attr('y' , function(d,i){ return '' + (i*1.4) + 'em';});
+
+
+ 	tspan.text(function(d){ return d;})
+
+}
+
