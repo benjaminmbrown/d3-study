@@ -54,20 +54,6 @@ var redraw = function(data){
 	bars.enter()
 		.append('rect')
 		.classed('bar', true)
-
-	// bars
-	// 	.attr("x", function(d,i){return x(i)})
-	// 	.attr('width', x.rangeBand)
-	// 	.attr("y", function(d){
-	// 		//return height - margin.bottom - (d.GoalsScored * 50);
-	// 		return y(d.GoalsScored);
-	// 	})
-	// 	.attr("height", function(d){ 
-			
-	// 		return y(0)-y(d.GoalsScored);
-	// 	});
-
-
 	bars
 		.attr("x", function(d,i){return x(i)})
 		.attr('width', x.rangeBand)

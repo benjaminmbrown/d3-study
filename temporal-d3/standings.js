@@ -119,10 +119,19 @@ var redraw = function(data) {
 		var bPoints = b.value[b.value.length -1].leaguePoints;
 		return d3.descending(aPoints, bPoints);
 	})
-
+ 
 
 	lines.each(function(d,i){
 	  	d3.select(this)
+	  		
+	  		//.style('stroke', colors24[i])//add line coloring based on color array
+	  // 		.attr("x", x(i))
+			// .attr('width', x.rangeBand)
+			// .attr("y",y(0))//start bar height at zero
+			// .attr('height', 0)
+			// .transition()
+			// .delay(i*50)
+			// .duration(500)
 		  	.style('stroke', colors24[i])//add line coloring based on color array
 		  	.attr('class','line-graph')
 		  	.attr('transform', "translate("+xAxis.tickPadding()+",0)")
